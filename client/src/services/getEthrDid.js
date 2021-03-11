@@ -3,6 +3,7 @@ import EthrDID from 'ethr-did'
 import { Resolver } from 'did-resolver'
 import { getResolver, delegateTypes } from 'ethr-did-resolver'
 import getWeb3 from './getWeb3';
+import { ACCESS_DID_ADDRESS, ACCESS_DID_PRIVATEKEY} from '../constants/apiConstants';
 
 let web3 = null;
 let deployedNetwork = null;
@@ -20,7 +21,17 @@ export async function getEthrDid() {
       EthereumDidRegistry.abi,
       deployedNetwork && deployedNetwork.address,
     );
-    keyPair = EthrDID.createKeyPair();
+
+    const address = localStorage.getItem(ACCESS_DID_ADDRESS);
+    const private_key = localStorage.getItem(ACCESS_DID_PRIVATEKEY);
+    if (address && private_key){
+      keyPair = {address, private_key};
+    }
+    else {
+      keyPair = EthrDID.createKeyPair();
+      localStorage.setItem(ACCESS_DID_ADDRESS, keyPair.address);
+      localStorage.setItem(ACCESS_DID_PRIVATEKEY, keyPair.privateKey);
+    }
     ethrDid = new EthrDID({provider: web3.currentProvider, registry: deployedNetwork.address, address: keyPair.address});
     resolver = new Resolver(getResolver({
         provider: web3.currentProvider,

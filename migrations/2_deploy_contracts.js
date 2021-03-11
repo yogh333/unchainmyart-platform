@@ -1,5 +1,5 @@
-var SimpleStorage = artifacts.require("./SimpleStorage.sol");
+var EthereumDidRegistry = artifacts.require("./EthereumDidRegistry");
 
 module.exports = function(deployer) {
-  deployer.deploy(SimpleStorage);
+  deployer.deploy(EthereumDidRegistry);
 };

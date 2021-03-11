@@ -1,2 +1,16 @@
 https://coderwhodreams.com/blog/create-basic-login-forms-using-react-js-hooks-and-bootstrap/
 
+Running the demo:
+
+0) Launch backend server (available @ https://github.com/jcaporossi/auth-server):
+    node index.js
+1) Launch a private blockchain with ganache-cli: 
+    ganache-cli
+2) Compile smart contracts:
+    truffle compile
+3) Deploy smart contracts:
+    truffle migrate
+4) Launch application:
+    cd client/
+    yarn start
+5) Use Chrome and install CORS enabling extension (and activate it !)   

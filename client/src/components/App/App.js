@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import DecentralizedID from '../DecentralizedID/DecentralizedID'
 import FileNamer from '../FileNamer/FileNamer'
+import Home from '../Home/Home'
 import Header from '../Header/Header'
 import LoginForm from '../LoginForm/LoginForm';
 import RegistrationForm from '../RegistrationForm/RegistrationForm';

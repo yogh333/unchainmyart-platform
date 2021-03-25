@@ -1,0 +1,28 @@
+{
+    "Users": [
+        {
+            "name": "Jerome",
+            "did" : "did:eth:deadbeefdeadbeefdeadbeef"
+        },
+        {
+            "name": "Sara",
+            "did" : "did:eth:deafbabedeafbabedeafbabe"
+        }
+    ],
+    "Artworks": [
+        {
+            "creator": "did:eth:artistfoo0",
+            "description": "Mona Lisa is coding blockchain",
+            "private": false,
+            "proofOfExistence": "http://monalisaBlockchain.jpeg",
+            "proofOfProperty": "http://monalisaBlockchanProp.jpeg"
+        },
+        {
+            "creator": "did:eth:artistfoo0",
+            "description": "Leonard loves DeFi",
+            "private": true,
+            "proofOfExistence": "http://leonardDefi.jpeg",
+            "proofOfProperty": "http://leonardDefiProp.jpeg"
+        }
+    ]
+  }

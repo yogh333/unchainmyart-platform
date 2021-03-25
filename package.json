@@ -1,0 +1,25 @@
+{
+  "name": "unchainmyart-platform",
+  "version": "1.0.0",
+  "description": "https://coderwhodreams.com/blog/create-basic-login-forms-using-react-js-hooks-and-bootstrap/",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jcaporossi/unchainmyart-platform.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jcaporossi/unchainmyart-platform/issues"
+  },
+  "homepage": "https://github.com/jcaporossi/unchainmyart-platform#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^3.4.1"
+  }
+}

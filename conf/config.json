@@ -1,12 +1,25 @@
 {
-    "Users": [
+
+    "Administrators": [
         {
-            "name": "Jerome",
-            "did" : "did:eth:deadbeefdeadbeefdeadbeef"
+            "address": "0xFd085d7b658Dcd39761ebb31d32D16e7d7e9c2E6"
         },
         {
-            "name": "Sara",
-            "did" : "did:eth:deafbabedeafbabedeafbabe"
+            "address": "0x7C4d13539Bea40987c4dEDb7b9c7131de4367eEE"
+        }
+    ],
+    "Users": [
+        {
+            "address": "0xAF9d5B47331Ad96D011dc9f017F66816E54074B0",
+            "did" : "did:eth:abcdefabcdefabcdefabcdef"
+        },
+        {
+            "address": "0x52Ba20ac539294Ee4cE51D2f7968A479A1Ca9A17",
+            "did" : "did:eth:0123456789abcdef"
+        },
+        {
+            "address": "0x1A72B13c2986b9657912000cC534ff83aa0B6AA7",
+            "did" : "did:eth:abcdefabcdefabcdefabcdef"
         }
     ],
     "Artworks": [

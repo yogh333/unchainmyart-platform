@@ -4,125 +4,134 @@ pragma solidity ^0.7.0;
 
 pragma abicoder v2;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/presets/ERC1155PresetMinterPauser.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract ArtToken is ERC721 {
-    constructor(string memory name, string memory symbol) ERC721(name, symbol) {}
-}
+contract UnchainMyArt is ERC1155PresetMinterPauser {
 
-contract UnchainMyArt {
+    using Counters for Counters.Counter;
 
-    using SafeMath for uint256;
-
-    enum RequestState {REQ_NEW, REQ_ASSIGNED, REQ_REVIEWED, REQ_COMPLETED, REQ_CLOSED}
-
-    struct Item {
-        string creatorDid;
-        string ownerDid;
-        string description;
-        bool privacy;
-        string proofOfExistenceURI;
-        string proofOfPropertyURI;
-        address tokenAddress;
-        uint256 tokenCreationTimestamp;
+    enum RequestState {REQ_NEW, REQ_ASSIGNED, REQ_COMPLETED}
+    //enum UserRole {UNDEFINED_ROLE, ARTMIN_ROLE, ARTIST_ROLE, COLLECTOR_ROLE}
+    //bytes32 public constant UNDEFINED_ROLE = keccak256("UNDEFINED_ROLE");
+    //bytes32 public constant MANAGER_ROLE = keccak256("ARTMIN_ROLE");
+    //bytes32 public constant ARTIST_ROLE = keccak256("ARTIST_ROLE");
+    //bytes32 public constant COLLECTOR_ROLE = keccak256("COLLECTOR_ROLE");
+    //bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    
+    struct PairID {
+        uint256 nftID;
+        uint256 ftID;
     }
 
-    struct Request {
+    struct Item {
         address requester;          // requester address
         uint256 requestID;          // request ID
         uint256 requestTimestamp;   
         RequestState requestState;
-        Item item; 
+        string creatorDid;
+        string description;
+        PairID pair;
+        bool privacy;
+        string proofOfExistenceURI;
+        string proofOfPropertyURI;
+        uint256 tokenCreationTimestamp;
     }
 
     struct User {
 		address user;           // user's blockchain address
         string did;             // user's DID
-        string name;            // user's name
-        bool userRegistered;    
 	}
 
-    event eRegister(string _name, string _did);
-    event eArtToken(address tokenCreator, uint256 reqID, address ArtToken);
+    event eRegister(address user, string did);
+    event eArtToken(address to, uint256 NFTokenId, uint256 FTokenID, uint256 supply);
     event eRequest(address requester, uint256 reqID);
 
-    mapping(address => User) private users;	// Mapping of users  
-    uint256 private nbOfUsers;
-    
-    mapping(address => Request[]) private userToRequest; // list of requests by user
-    
-    mapping(uint256 => Request) requests;
-    uint256 private nbOfRequests;
+    mapping(address => User) private _users;	// Mapping of platform users  
+
+    Counters.Counter private _requestsCounter;    
+    mapping(uint256 => Item) private _requestToItem;
  
-    constructor() {
-        nbOfRequests = 0;
-        nbOfUsers = 0;
+    constructor() ERC1155PresetMinterPauser("") {
     }
 
-    function registerUser(string memory _name, string memory _did) external {
+    function setRoleAdmin (address user) public {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "operation only allowed to platform administrator");
+        grantRole(DEFAULT_ADMIN_ROLE, user);
+        grantRole(MINTER_ROLE, user);
+    }
+
+    function registerUser(address userAddress, string memory userDid) public {
         
-        require(!users[msg.sender].userRegistered, "user already registered");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "sender is not allowed to register an new user");
+        require(_users[userAddress].user == address(0x0), "user is already registered");
 
-        users[msg.sender].user = msg.sender;
-		users[msg.sender].name = _name;
-        users[msg.sender].did = _did;
-        users[msg.sender].userRegistered = true;
+        User memory newUser;
+        newUser.user = userAddress;
+        newUser.did = userDid;
 
-        nbOfUsers = nbOfUsers.add(1);
-
-		emit eRegister(_name, _did);
+        _users[userAddress] = newUser;    
+        emit eRegister(userAddress, userDid);
     }
 
-    function getNbOfUsers() view external returns (uint256 n){
-        return nbOfUsers;
-    }
-
-    function request(string memory _creatorDid, string memory _description, bool _private, string memory _poeURI, string memory _popURI) external {
+    function registerItem(
+        string memory itemCreatorDid, 
+        string memory itemDescription, 
+        bool itemPrivacyFlag, 
+        string memory itemPoeURI, 
+        string memory itemPopURI) external {
 		
-        require(users[msg.sender].userRegistered, "user not registered");
-        
-		Request storage req = requests[nbOfRequests];
+        require(_users[msg.sender].user != address(0x0), "user not registered");
+        //require(hasRole(MANAGER_ROLE, msg.sender), "only Artministrator is allowed to request an item to be registered");
 
-        req.requester = msg.sender;
-        req.requestID = nbOfRequests;
-        req.requestTimestamp = block.timestamp;
-        req.requestState = RequestState.REQ_NEW; 
+        Item memory item = Item({
+            requester: msg.sender, 
+            requestID: Counters.current(_requestsCounter), 
+            requestTimestamp: block.timestamp, 
+            requestState: RequestState.REQ_NEW,
+            creatorDid: itemCreatorDid,
+            description: itemDescription,
+            pair: PairID({
+                nftID: 0,
+                ftID: 0
+            }),
+            privacy: itemPrivacyFlag,
+            proofOfExistenceURI: itemPoeURI,
+            proofOfPropertyURI: itemPopURI,
+            tokenCreationTimestamp: 0
+        });
 
-        req.item.creatorDid = _creatorDid;
-        req.item.description = _description;
-        req.item.privacy = _private;
-        req.item.proofOfExistenceURI = _poeURI;
-        req.item.proofOfPropertyURI = _popURI;
+        _requestToItem[item.requestID] = item;
+        Counters.increment(_requestsCounter);
 
-        userToRequest[msg.sender].push(req);
-
-        nbOfRequests = nbOfRequests.add(1);
-
-		emit eRequest(msg.sender, req.requestID);
+		emit eRequest(msg.sender, item.requestID);
 	}
 
-    function getRequest(uint256 _reqID) public view returns (Request memory) {
-        require(users[msg.sender].userRegistered, "user not registered");
-        require(requests[_reqID].requestState >= RequestState.REQ_NEW, "request does not exist yet");
+    function getItemFromReqID(uint256 reqID) public view returns (Item memory) {
 
-        Request storage req = requests[_reqID];
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender));
 
-        return req;
+        return _requestToItem[reqID];
     }
 
-    function createArtToken(uint256 _reqID, string memory name, string memory symbol) public {
+    function mintUMAToken(address to, uint256 reqID) public {
+        
+        require(hasRole(MINTER_ROLE, msg.sender));
 
-        require(users[msg.sender].userRegistered, "user not registered");
-        require(requests[_reqID].requestState >= RequestState.REQ_NEW, "request has not been assigned yet");
+        Item storage item = _requestToItem[reqID];
+        item.pair.nftID = SafeMath.mul(reqID, 2);
+        item.pair.ftID = SafeMath.add(item.pair.nftID, 1);
 
-        Request storage req = requests[_reqID];
-        Item storage item = req.item;
+        uint256[] memory ids = new uint256[](2);
+        ids[0] = item.pair.nftID;
+        ids[1] = item.pair.ftID;
+        uint256[] memory supply = new uint256[](2);
+        supply[0] = 1;
+        supply[1] = 100;
 
-        item.tokenAddress = address(new ArtToken(name, symbol));
-        item.tokenCreationTimestamp = block.timestamp;
-        req.requestState = RequestState.REQ_COMPLETED;
+        mintBatch(to, ids, supply, "");
 
-        emit eArtToken(msg.sender, _reqID, item.tokenAddress);
+        emit eArtToken(to, item.pair.nftID, item.pair.ftID, supply[1]);
+
     }
 }

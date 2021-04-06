@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/jcaporossi/unchainmyart-platform#readme",
   "dependencies": {
-    "@openzeppelin/contracts": "^3.4.1"
+    "@openzeppelin/contracts": "^3.4.1",
+    "truffle-contract-size": "^2.0.1"
   }
 }
